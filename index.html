@@ -252,6 +252,25 @@ tr:hover td{background:#fafbfc}
   </div>
 </div>
 
+<!-- IMAGE MODAL -->
+<div class="overlay" id="image-overlay">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head" style="position:relative;padding:0">
+      <img id="expanded-img" src="" alt="" style="width:100%;height:auto;max-height:60vh;object-fit:contain">
+      <button class="modal-close" id="image-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--navy);margin-bottom:8px" id="expanded-name"></div>
+      <div style="font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:16px" id="expanded-desc"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--coral)" id="expanded-price"></div>
+        <span class="spill" id="expanded-stock" style="font-size:.7rem"></span>
+      </div>
+      <button class="bconf" id="btn-order-from-modal" style="width:100%">🛒 Order Now</button>
+    </div>
+  </div>
+</div>
+
 <!-- ORDER MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -457,6 +476,43 @@ function getImageUrl(url){
   return url;
 }
 
+
+// Show expanded image view
+function showImageModal(toyId){
+  const toy = toys.find(t=>String(t.id)===String(toyId));
+  if(!toy) return;
+  
+  const imgUrl = getImageUrl(toy.imageurl);
+  document.getElementById('expanded-img').src = imgUrl || '🧸';
+  document.getElementById('expanded-name').textContent = toy.name;
+  document.getElementById('expanded-desc').textContent = toy.description || '';
+  document.getElementById('expanded-price').textContent = '$' + Number(toy.price).toLocaleString('en-US');
+  
+  const stock = (toy.instock||'yes').toString().toLowerCase()!=='no';
+  const stockEl = document.getElementById('expanded-stock');
+  stockEl.className = 'spill ' + (stock ? 'ful' : 'ord');
+  stockEl.textContent = stock ? 'In Stock' : 'Sold Out';
+  
+  document.getElementById('btn-order-from-modal').onclick = ()=>{
+    document.getElementById('image-overlay').classList.remove('open');
+    if(!user){ requireLogin(toyId); return; }
+    openModal(toyId);
+  };
+  
+  document.getElementById('image-overlay').classList.add('open');
+}
+
+document.getElementById('image-close').addEventListener('click',()=>{
+  document.getElementById('image-overlay').classList.remove('open');
+});
+
+document.getElementById('image-overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('image-overlay')){
+    document.getElementById('image-overlay').classList.remove('open');
+  }
+});
+
+
 function renderGrid(){
   const q=document.getElementById('search').value.trim().toLowerCase();
   let list=toys;
@@ -467,7 +523,7 @@ function renderGrid(){
   if(!list.length){ g.innerHTML='<div class="empty" style="grid-column:1/-1"><span class="big">🔍</span><p>No toys match.</p></div>'; return; }
   g.innerHTML=list.map((t,i)=>{
     const ok=(t.instock||'yes').toString().toLowerCase()!=='no';
-    const imgUrl=getImageUrl(t.imageurl); const img=imgUrl?`<img src="${imgUrl}" alt="${t.name}" loading="lazy" onerror="this.style.display='none'">`:'';
+    const imgUrl=getImageUrl(t.imageurl); const img=imgUrl?`<img src="${imgUrl}" alt="${t.name}" loading="lazy" onerror="this.style.display='none'" onclick="showImageModal('${t.id}')" style="cursor:pointer">`:'';
     return `<div class="card" data-id="${t.id}" style="animation-delay:${Math.min(i*40,260)}ms">
       <div class="cimg">${img}${!t.imageurl?'🧸':''}<span class="sbadge ${ok?'in':'out'}">${ok?'In Stock':'Sold Out'}</span></div>
       <div class="cbody">
@@ -545,11 +601,12 @@ function renderMyOrders(){
   if(!mine.length){ el.innerHTML='<div class="empty"><span class="big">🛒</span><p>No orders yet. Go shop!</p></div>'; return; }
   el.innerHTML=mine.map(o=>{
     const toy=toys.find(t=>String(t.id)===String(o.toyId||o.toyid));
-    const img=toy?.imageurl?`<img src="${toy.imageurl}" alt="">`:o.toyName?o.toyName[0]:'🧸';
+    const imgUrl = toy ? getImageUrl(toy.imageurl) : '';
+    const img = imgUrl ? `<img src="${imgUrl}" alt="">` : '🧸';
     const st=o.status||'Ordered';
-    const d=o.timestamp?new Date(o.timestamp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const d=o.timestamp?new Date(o.timestamp).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<div class="ocard">
-      <div class="othumb">${toy?.imageurl?`<img src="${toy.imageurl}" alt="">`:img}</div>
+      <div class="othumb">${img}</div>
       <div class="oinfo"><div class="oname">${o.toyName||o.toyname||'—'}</div><div class="ometa">${d}</div></div>
       <div class="oprice">$${Number(o.price).toLocaleString('en-US')}</div>
       <span class="spill ${st==='Fulfilled'?'ful':'ord'}">${st}</span>
