@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎯 Kinactive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client"></script>
+<style>
+:root{
+  --bg:#fdf6ec;--card:#fff;--sun:#f9c23c;--sun2:#f59e0b;
+  --coral:#f76c6c;--teal:#3bbfb0;--grape:#9b5de5;
+  --navy:#1a2340;--ink:#2d3a4a;--muted:#8898aa;--border:#eef0f5;
+  --green:#22c55e;--r:18px;
+  --sh:0 4px 24px rgba(26,35,64,.09);--sh2:0 16px 48px rgba(26,35,64,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* LOGIN */
+#login-screen{display:none;position:fixed;inset:0;z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:rgba(26,35,64,.7);backdrop-filter:blur(10px)}
+#login-screen.open{display:flex;}
+.lcard{background:var(--card);border-radius:28px;padding:40px 36px 36px;max-width:420px;width:100%;box-shadow:var(--sh2);text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);position:relative}
+.lcard-close{position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.lcard-close:hover{background:#e2e8f0;color:var(--ink)}
+.lcard .logo{font-size:4rem;display:block;animation:bounce 2s infinite}
+.lcard h1{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--navy);margin:12px 0 4px}
+.lcard p{color:var(--muted);font-size:.92rem;margin-bottom:28px;line-height:1.6}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px}
+.tag{background:#f1f5f9;color:var(--ink);border-radius:50px;padding:5px 14px;font-size:.78rem;font-weight:600}
+#gsign{width:100%;padding:14px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,transform .15s;box-shadow:0 4px 16px rgba(26,35,64,.2)}
+#gsign:hover{background:#2d3a4a;transform:translateY(-2px)}
+.gico{width:22px;height:22px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#e44;flex-shrink:0}
+
+/* APP */
+#app{display:flex;flex-direction:column;min-height:100vh}
+#app.on{display:flex}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(253,246,236,.96);backdrop-filter:blur(14px);border-bottom:2px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:10px;height:62px}
+.tlogo{font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--navy);flex:1}
+.tlogo span{color:var(--coral)}
+.upill{display:flex;align-items:center;gap:7px;background:var(--card);border:2px solid var(--border);border-radius:50px;padding:5px 12px 5px 5px;font-size:.78rem;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .2s}
+.upill:hover{border-color:var(--coral)}
+.uav{width:28px;height:28px;border-radius:50%;background:var(--sun);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--navy);overflow:hidden;flex-shrink:0}
+.uav img{width:100%;height:100%;object-fit:cover}
+.abadge{background:var(--grape);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:50px;text-transform:uppercase;letter-spacing:.05em}
+.cbtn{position:relative;background:var(--sun);border:none;width:40px;height:40px;border-radius:12px;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;box-shadow:0 2px 8px rgba(249,194,60,.3)}
+.cbtn:hover{transform:scale(1.1)}
+.ccnt{position:absolute;top:-6px;right:-6px;background:var(--coral);color:#fff;font-size:.62rem;font-weight:700;min-width:18px;height:18px;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+/* NAV */
+.navtabs{display:flex;gap:4px;padding:12px 20px 0;border-bottom:2px solid var(--border);background:var(--bg);overflow-x:auto}
+.ntab{padding:9px 16px;border-radius:12px 12px 0 0;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.ntab.active{color:var(--navy);border-bottom-color:var(--coral);background:var(--card)}
+.ntab:hover:not(.active){color:var(--ink);background:rgba(0,0,0,.04)}
+
+/* VIEWS */
+.view{display:none;flex:1;padding:22px 20px 60px;max-width:1200px;margin:0 auto;width:100%}
+.view.active{display:block}
+
+/* CONTROLS */
+.crow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.sbox{flex:1 1 200px;position:relative}
+.sbox input{width:100%;padding:10px 14px 10px 36px;border:2px solid var(--border);border-radius:50px;font-family:'Poppins',sans-serif;font-size:.88rem;font-weight:500;outline:none;background:var(--card);transition:border-color .18s}
+.sbox input:focus{border-color:var(--teal)}
+.sico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1rem}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:6px 14px;border-radius:50px;border:2px solid var(--border);background:var(--card);font-family:'Poppins',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .16s;color:var(--ink);white-space:nowrap}
+.chip:hover{border-color:var(--sun)}
+.chip.active{background:var(--sun);border-color:var(--sun2);color:var(--navy)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;animation:fadeUp .35s ease both;cursor:pointer}
+.card:hover{transform:translateY(-7px);box-shadow:var(--sh2)}
+.cimg{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:3.5rem;overflow:hidden;position:relative}
+.cimg img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.sbadge{position:absolute;top:9px;left:9px;font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:50px;text-transform:uppercase;letter-spacing:.05em}
+.sbadge.in{background:var(--green);color:#fff}
+.sbadge.out{background:var(--muted);color:#fff}
+.cbody{padding:13px 15px 15px}
+.ccat{font-size:.68rem;font-weight:700;color:var(--grape);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.cname{font-family:'Fredoka One',cursive;font-size:1.08rem;color:var(--navy);margin-bottom:5px;line-height:1.2}
+.cdesc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cfoot{display:flex;align-items:center;justify-content:space-between}
+.price{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--coral)}
+.boc{background:linear-gradient(135deg,var(--teal),#0ea5e9);color:#fff;border:none;padding:7px 14px;border-radius:50px;font-family:'Poppins',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 3px 10px rgba(59,191,176,.3)}
+.boc:hover{transform:scale(1.07);box-shadow:0 5px 16px rgba(59,191,176,.4)}
+.boc:disabled{background:#e2e8f0;color:var(--muted);box-shadow:none;cursor:not-allowed}
+
+/* ORDERS */
+.stitle{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--navy);margin-bottom:16px}
+.olist{display:flex;flex-direction:column;gap:13px}
+.ocard{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);display:flex;align-items:center;gap:13px;animation:fadeUp .3s ease}
+.othumb{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;overflow:hidden}
+.othumb img{width:100%;height:100%;object-fit:cover}
+.oinfo{flex:1;min-width:0}
+.oname{font-weight:700;color:var(--navy);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ometa{font-size:.76rem;color:var(--muted);margin-top:2px}
+.oprice{font-family:'Fredoka One',cursive;font-size:1.08rem;color:var(--coral);white-space:nowrap}
+.spill{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.spill.ord{background:#fef3c7;color:#92400e}
+.spill.ful{background:#dcfce7;color:#166534}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .big{font-size:3.5rem;display:block;margin-bottom:10px}
+.empty p{font-size:.92rem;font-weight:600}
+
+/* ADMIN */
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.astat{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px}
+.asico{font-size:1.8rem;width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.aslabel{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.asval{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--navy)}
+.atbl{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:22px}
+.atblh{padding:14px 18px;border-bottom:2px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.atblh h3{font-family:'Fredoka One',cursive;font-size:1.08rem;color:var(--navy)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 14px;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border);background:#fafbfc}
+td{padding:11px 14px;font-size:.81rem;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+.bsm{padding:5px 11px;border-radius:8px;border:none;font-family:'Poppins',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s}
+.bgr{background:#dcfce7;color:#166534}.bgr:hover{background:#bbf7d0}
+.brd{background:#fee2e2;color:#991b1b}.brd:hover{background:#fecaca}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(26,35,64,.5);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:var(--card);border-radius:24px;max-width:440px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.22);overflow:hidden;animation:popIn .28s cubic-bezier(.34,1.56,.64,1)}
+.mhead{background:linear-gradient(135deg,var(--sun),var(--coral));padding:20px 22px 16px;display:flex;gap:12px;align-items:center;position:relative}
+.mthumb{width:68px;height:68px;border-radius:14px;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;flex-shrink:0}
+.mthumb img{width:100%;height:100%;object-fit:cover}
+.mclose{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s}
+.mclose:hover{background:rgba(255,255,255,.35)}
+.mbody{padding:20px 22px 22px}
+.mdesc{font-size:.84rem;color:var(--ink);line-height:1.6;margin-bottom:14px}
+.pfbox{background:#f8fafc;border-radius:12px;padding:11px 13px;margin-bottom:14px;border:2px solid var(--border)}
+.pfrow{display:flex;justify-content:space-between;align-items:center}
+.pfrow+.pfrow{margin-top:5px}
+.pfrow span:first-child{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+.pfrow span:last-child{font-size:.86rem;font-weight:600;color:var(--navy)}
+.frow{margin-bottom:12px}
+.frow label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.frow input,.frow textarea{width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:11px;font-family:'Poppins',sans-serif;font-size:.88rem;font-weight:500;outline:none;color:var(--navy);transition:border-color .18s}
+.frow input:focus,.frow textarea:focus{border-color:var(--teal)}
+.frow textarea{resize:none;height:60px}
+.bconf{width:100%;padding:13px;background:linear-gradient(135deg,var(--coral),#f97316);color:#fff;border:none;border-radius:13px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;box-shadow:0 5px 18px rgba(247,108,108,.35);transition:transform .15s,box-shadow .15s}
+.bconf:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(247,108,108,.4)}
+.bconf:disabled{background:#e2e8f0;color:var(--muted);box-shadow:none;cursor:not-allowed}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--navy);color:#fff;padding:12px 24px;border-radius:50px;font-weight:600;font-size:.86rem;z-index:500;transition:transform .32s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popIn{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+
+@media(max-width:520px){
+  .grid{grid-template-columns:1fr 1fr;gap:11px}
+  .cbody{padding:9px 11px 12px}
+  .cname{font-size:.9rem}
+  .price{font-size:1rem}
+  .boc{padding:6px 10px;font-size:.72rem}
+  .lcard{padding:36px 24px 32px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lcard">
+    <button class="lcard-close" id="login-close">✕</button>
+    <span class="logo">🎯</span>
+    <h1>Sign in to Order</h1>
+    <p>Login with Google to place your order.<br/>It only takes a second!</p>
+    <div class="tag-row">
+      <span class="tag">🔒 Secure</span>
+      <span class="tag">⚡ One tap</span>
+      <span class="tag">✅ Free</span>
+    </div>
+    <button id="gsign"><div class="gico">G</div>Continue with Google</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="tlogo">🎯 <span>Kin</span>active</div>
+    <button class="cbtn" id="cbtn" title="My Orders">🛒<span class="ccnt" id="ccnt" style="display:none">0</span></button>
+    <div class="upill" id="upill" onclick="requireLogin()">
+      <div class="uav" id="uav">👤</div>
+      <span id="ulabel">Login</span>
+    </div>
+  </div>
+
+  <div class="navtabs" id="navtabs">
+    <button class="ntab active" data-view="catalog">🏪 Shop</button>
+    <button class="ntab" data-view="my-orders">📦 My Orders</button>
+  </div>
+
+  <!-- CATALOG -->
+  <div class="view active" id="view-catalog">
+    <div class="crow">
+      <div class="sbox"><span class="sico">🔍</span><input type="text" id="search" placeholder="Search toys…"/></div>
+      <div class="chips" id="chips"><button class="chip active" data-cat="all">All</button></div>
+    </div>
+    <div id="rcount" style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:13px"></div>
+    <div class="grid" id="grid"><div class="empty" style="grid-column:1/-1"><span class="big">⏳</span><p>Loading toys…</p></div></div>
+  </div>
+
+  <!-- MY ORDERS -->
+  <div class="view" id="view-my-orders">
+    <div class="stitle">📦 My Orders</div>
+    <div class="olist" id="my-olist"><div class="empty"><span class="big">🛒</span><p>No orders yet. Go shop!</p></div></div>
+  </div>
+
+  <!-- ADMIN ORDERS -->
+  <div class="view" id="view-admin-orders">
+    <div class="stitle">📋 All Orders</div>
+    <div class="agrid" id="astats"></div>
+    <div class="atbl">
+      <div class="atblh"><h3>Order List</h3></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Buyer</th><th>Contact</th><th>Toy</th><th>Price</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="aotbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN INVENTORY -->
+  <div class="view" id="view-admin-inventory">
+    <div class="stitle">🧸 Inventory</div>
+    <div class="atbl">
+      <div class="atblh"><h3>All Toys</h3></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Toy</th><th>Category</th><th>Price</th><th>Stock</th><th>Toggle</th></tr></thead>
+        <tbody id="invtbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN WISHLISTS -->
+  <div class="view" id="view-admin-wishlists">
+    <div class="stitle">💛 Buyer Activity</div>
+    <div class="olist" id="wlist"><div class="empty"><span class="big">💛</span><p>No buyer data yet.</p></div></div>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="mhead">
+      <div class="mthumb" id="mthumb">🧸</div>
+      <div>
+        <div style="font-size:.7rem;font-weight:700;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em" id="mcat"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.22rem;color:#fff;line-height:1.2" id="mname"></div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.38rem;color:#fff;margin-top:2px" id="mprice"></div>
+      </div>
+      <button class="mclose" id="mclose">✕</button>
+    </div>
+    <div class="mbody">
+      <p class="mdesc" id="mdesc"></p>
+      <div class="pfbox">
+        <div class="pfrow"><span>Name</span><span id="pfname">—</span></div>
+        <div class="pfrow"><span>Email</span><span id="pfemail">—</span></div>
+      </div>
+      <div class="frow"><label>Phone (optional)</label><input type="tel" id="fphone" placeholder="e.g. 9876543210"/></div>
+      <div class="frow"><label>Note for seller</label><textarea id="fnote" placeholder="Preferred colour, delivery time…"></textarea></div>
+      <button class="bconf" id="bconf">🛒 Confirm Order</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════
+//  ★  CONFIGURATION  ★
+// ══════════════════════════
+const CFG = {
+  GOOGLE_CLIENT_ID: "940698084404-65ju48bduqpau7gchkpsf7e96gi92gqf.apps.googleusercontent.com",
+  APPS_SCRIPT_URL:  "https://script.google.com/macros/s/AKfycbxGWDJ-TZnjviIvK7jgmtgqyVRkoCpTBEQh8D15QJMTpOydTK-e9C3YD0GIbQfXUjx6/exec",
+  ADMIN_EMAIL:      "patrosoftllc@gmail.com",
+};
+// ══════════════════════════
+
+let user=null, isAdmin=false, toys=[], orders=[], activeToy=null, activeCat="all";
+
+const DEMO=[
+  {id:1,name:"Wooden Block Tower",description:"Stack 40 colourful hardwood blocks. Builds motor skills and creativity.",price:349,category:"Building",imageurl:"",instock:"Yes"},
+  {id:2,name:"100-Piece Jigsaw",description:"Beautiful wildlife puzzle. Great for focus in kids 6+.",price:249,category:"Puzzles",imageurl:"",instock:"Yes"},
+  {id:3,name:"Ring Toss Garden Game",description:"Outdoor ring toss with 5 rings and 3 posts.",price:199,category:"Outdoor",imageurl:"",instock:"Yes"},
+  {id:4,name:"Friendship Bracelet Kit",description:"Make 10 colourful bracelets with thread, beads, and charms.",price:179,category:"Crafts",imageurl:"",instock:"Yes"},
+  {id:5,name:"Magnetic Fishing Set",description:"Catch wooden fish with a magnetic rod! For toddlers 3+.",price:299,category:"Toddler",imageurl:"",instock:"Yes"},
+  {id:6,name:"Mini Carrom Board",description:"Classic 24×24 inch mini carrom for family fun.",price:599,category:"Board Games",imageurl:"",instock:"No"},
+];
+
+// ── Google Auth ──────────────────────────
+let pendingToyId = null; // toy user wanted to order before login
+
+function initGoogleAuth(){
+  if(CFG.GOOGLE_CLIENT_ID.includes("YOUR_")){
+    document.getElementById('gsign').addEventListener('click',()=>
+      login({name:"Demo User",email:"demo@example.com",picture:""}));
+  } else {
+    if(typeof google==='undefined'||!google.accounts){ setTimeout(initGoogleAuth,100); return; }
+    google.accounts.id.initialize({client_id:CFG.GOOGLE_CLIENT_ID,callback:onCred,auto_select:false,cancel_on_tap_outside:true});
+    google.accounts.id.renderButton(document.getElementById('gsign'),{theme:'filled_black',size:'large',width:320,text:'continue_with',shape:'rectangular'});
+    document.getElementById('gsign').addEventListener('click',()=>google.accounts.id.prompt());
+  }
+  // Close button
+  document.getElementById('login-close').addEventListener('click',()=>{
+    document.getElementById('login-screen').classList.remove('open');
+    pendingToyId=null;
+  });
+  // Click outside modal to close
+  document.getElementById('login-screen').addEventListener('click',e=>{
+    if(e.target===document.getElementById('login-screen')){
+      document.getElementById('login-screen').classList.remove('open');
+      pendingToyId=null;
+    }
+  });
+}
+window.addEventListener('load',()=>{
+  initGoogleAuth();
+  // Load catalog immediately without login
+  loadToys();
+  // Wire nav tabs
+  document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view,t)));
+  document.getElementById('cbtn').addEventListener('click',()=>{
+    if(!user){ requireLogin(); return; }
+    switchView('my-orders',document.querySelector('[data-view="my-orders"]'));
+  });
+});
+
+// Show login modal — called when user tries to order without being logged in
+function requireLogin(toyId){
+  pendingToyId = toyId || null;
+  document.getElementById('login-screen').classList.add('open');
+}
+
+function onCred(r){
+  const p=JSON.parse(atob(r.credential.split('.')[1]));
+  login({name:p.name,email:p.email,picture:p.picture||""});
+}
+
+function login(u){
+  user=u;
+  isAdmin=u.email.toLowerCase()===CFG.ADMIN_EMAIL.toLowerCase();
+  document.getElementById('login-screen').classList.remove('open');
+
+  // Update topbar
+  document.getElementById('ulabel').textContent=u.email;
+  const av=document.getElementById('uav');
+  av.innerHTML=u.picture?`<img src="${u.picture}" alt="av">`:`${u.name[0].toUpperCase()}`;
+  if(isAdmin) document.getElementById('upill').insertAdjacentHTML('beforeend','<span class="abadge">Admin</span>');
+
+  // Re-wire cart button now that we're logged in
+  document.getElementById('cbtn').onclick=()=>switchView('my-orders',document.querySelector('[data-view="my-orders"]'));
+
+  loadOrders();
+
+  // If user was trying to order a toy before login, open that modal now
+  if(pendingToyId){
+    openModal(pendingToyId);
+    pendingToyId=null;
+  }
+}
+
+function switchView(v,tab){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  if(tab) tab.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById(`view-${v}`);
+  if(el) el.classList.add('active');
+  if(v==='my-orders') renderMyOrders();
+  if(v==='admin-orders') renderAdminOrders();
+  if(v==='admin-inventory') renderInventory();
+  if(v==='admin-wishlists') renderWishlists();
+}
+
+// ── Data ─────────────────────────────────
+// JSONP fetch to avoid CORS issues with Apps Script
+function fetchScript(url){
+  return new Promise((resolve,reject)=>{
+    const cb='cb_'+Math.random().toString(36).slice(2);
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{ cleanup(); reject(new Error('timeout')); },10000);
+    function cleanup(){ try{delete window[cb]; document.body.removeChild(s);}catch(e){} clearTimeout(t); }
+    window[cb]=function(data){ cleanup(); resolve(data); };
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    s.onerror=()=>{ cleanup(); reject(new Error('load error')); };
+    document.body.appendChild(s);
+  });
+}
+
+async function loadToys(){
+  if(CFG.APPS_SCRIPT_URL.includes("YOUR_")){
+    toys=DEMO; showToast("📋 Demo mode — connect Google Sheet to go live",4000);
+  } else {
+    try{
+      const data=await fetchScript(`${CFG.APPS_SCRIPT_URL}?action=toys`);
+      toys=Array.isArray(data)?data:DEMO;
+    }
+    catch(e){ console.error('loadToys error',e); toys=DEMO; showToast("⚠️ Sheet unavailable — showing demo",4000); }
+  }
+  buildChips(); renderGrid();
+  if(isAdmin) renderInventory();
+}
+
+async function loadOrders(){
+  if(CFG.APPS_SCRIPT_URL.includes("YOUR_")){ orders=[]; return; }
+  try{
+    const data=await fetchScript(`${CFG.APPS_SCRIPT_URL}?action=orders`);
+    orders=Array.isArray(data)?data:[];
+  }
+  catch(e){ console.error('loadOrders error',e); orders=[]; }
+  updateBadge();
+}
+
+function updateBadge(){
+  const n=orders.filter(o=>(o.buyerEmail||o.buyeremail||"")===user.email&&o.status!=='Fulfilled').length;
+  const b=document.getElementById('ccnt');
+  n>0?(b.style.display='flex',b.textContent=n):b.style.display='none';
+}
+
+// ── Chips ─────────────────────────────────
+function buildChips(){
+  const cats=[...new Set(toys.map(t=>t.category).filter(Boolean))];
+  const w=document.getElementById('chips');
+  w.innerHTML='<button class="chip active" data-cat="all">All</button>';
+  cats.forEach(c=>{ const b=document.createElement('button'); b.className='chip'; b.dataset.cat=c; b.textContent=c; w.appendChild(b); });
+  w.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{
+    activeCat=b.dataset.cat;
+    w.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); renderGrid();
+  }));
+}
+
+// ── Grid ──────────────────────────────────
+
+// Convert Google Drive URLs to direct image URLs
+function getImageUrl(url){
+  if(!url) return '';
+  // Google Drive: https://drive.google.com/uc?export=view&id=FILE_ID
+  // Convert to: https://lh3.googleusercontent.com/d/FILE_ID
+  if(url.includes('drive.google.com')){
+    const match = url.match(/id=([a-zA-Z0-9-_]+)/);
+    if(match) return `https://lh3.googleusercontent.com/d/${match[1]}`;
+  }
+  return url;
+}
+
+function renderGrid(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  let list=toys;
+  if(activeCat!=='all') list=list.filter(t=>t.category===activeCat);
+  if(q) list=list.filter(t=>(t.name||'').toLowerCase().includes(q)||(t.description||'').toLowerCase().includes(q));
+  document.getElementById('rcount').textContent=`${list.length} toy${list.length!==1?'s':''} found`;
+  const g=document.getElementById('grid');
+  if(!list.length){ g.innerHTML='<div class="empty" style="grid-column:1/-1"><span class="big">🔍</span><p>No toys match.</p></div>'; return; }
+  g.innerHTML=list.map((t,i)=>{
+    const ok=(t.instock||'yes').toString().toLowerCase()!=='no';
+    const imgUrl=getImageUrl(t.imageurl); const img=imgUrl?`<img src="${imgUrl}" alt="${t.name}" loading="lazy" onerror="this.style.display='none'">`:'';
+    return `<div class="card" data-id="${t.id}" style="animation-delay:${Math.min(i*40,260)}ms">
+      <div class="cimg">${img}${!t.imageurl?'🧸':''}<span class="sbadge ${ok?'in':'out'}">${ok?'In Stock':'Sold Out'}</span></div>
+      <div class="cbody">
+        <div class="ccat">${t.category||''}</div>
+        <div class="cname">${t.name}</div>
+        <div class="cdesc">${t.description||''}</div>
+        <div class="cfoot">
+          <div class="price">$${Number(t.price).toLocaleString('en-US')}</div>
+          <button class="boc" ${ok?'':'disabled'} data-id="${t.id}">${ok?'🛒 Order':'Sold Out'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  g.querySelectorAll('.boc:not(:disabled)').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(!user){ requireLogin(b.dataset.id); return; }
+    openModal(b.dataset.id);
+  }));
+  g.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>{
+    // card click just views — order button handles login
+  }));
+}
+document.getElementById('search').addEventListener('input',renderGrid);
+
+// ── Modal ─────────────────────────────────
+function openModal(id){
+  activeToy=toys.find(t=>String(t.id)===String(id));
+  if(!activeToy) return;
+  document.getElementById('mcat').textContent=activeToy.category||'';
+  document.getElementById('mname').textContent=activeToy.name;
+  document.getElementById('mprice').textContent=`$${Number(activeToy.price).toLocaleString('en-US')}`;
+  document.getElementById('mdesc').textContent=activeToy.description||'';
+  document.getElementById('pfname').textContent=user.name;
+  document.getElementById('pfemail').textContent=user.email;
+  const th=document.getElementById('mthumb');
+  th.innerHTML=activeToy.imageurl?`<img src="${activeToy.imageurl}" alt="">`:'🧸';
+  document.getElementById('fphone').value='';
+  document.getElementById('fnote').value='';
+  const btn=document.getElementById('bconf');
+  btn.disabled=false; btn.textContent='🛒 Confirm Order';
+  document.getElementById('overlay').classList.add('open');
+}
+document.getElementById('mclose').addEventListener('click',()=>document.getElementById('overlay').classList.remove('open'));
+document.getElementById('overlay').addEventListener('click',e=>{ if(e.target===document.getElementById('overlay')) document.getElementById('overlay').classList.remove('open'); });
+
+// ── Place Order ───────────────────────────
+document.getElementById('bconf').addEventListener('click',async()=>{
+  if(!activeToy) return;
+  const btn=document.getElementById('bconf');
+  btn.disabled=true; btn.textContent='⏳ Placing…';
+  const payload={action:'order',buyerName:user.name,buyerEmail:user.email,
+    buyerPhone:document.getElementById('fphone').value.trim(),
+    toyId:activeToy.id,toyName:activeToy.name,price:activeToy.price,
+    notes:document.getElementById('fnote').value.trim(),
+    status:'Ordered',timestamp:new Date().toISOString()};
+
+  if(CFG.APPS_SCRIPT_URL.includes("YOUR_")){
+    await new Promise(r=>setTimeout(r,800));
+    orders.push({...payload,rowIndex:orders.length+2});
+    updateBadge(); document.getElementById('overlay').classList.remove('open');
+    showToast('🎉 Order placed! Kinactive will contact you soon.'); return;
+  }
+  try{
+    const r=await fetch(CFG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(d.success){ orders.push({...payload,rowIndex:d.rowIndex}); updateBadge(); document.getElementById('overlay').classList.remove('open'); showToast('🎉 Order placed! Kinactive will contact you soon.'); }
+    else{ showToast('❌ Error. Try again.'); btn.disabled=false; btn.textContent='🛒 Confirm Order'; }
+  }catch{ showToast('❌ Network error. Try again.'); btn.disabled=false; btn.textContent='🛒 Confirm Order'; }
+});
+
+// ── My Orders ────────────────────────────
+function renderMyOrders(){
+  const mine=orders.filter(o=>(o.buyerEmail||o.buyeremail||'')===user.email);
+  const el=document.getElementById('my-olist');
+  if(!mine.length){ el.innerHTML='<div class="empty"><span class="big">🛒</span><p>No orders yet. Go shop!</p></div>'; return; }
+  el.innerHTML=mine.map(o=>{
+    const toy=toys.find(t=>String(t.id)===String(o.toyId||o.toyid));
+    const img=toy?.imageurl?`<img src="${toy.imageurl}" alt="">`:o.toyName?o.toyName[0]:'🧸';
+    const st=o.status||'Ordered';
+    const d=o.timestamp?new Date(o.timestamp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    return `<div class="ocard">
+      <div class="othumb">${toy?.imageurl?`<img src="${toy.imageurl}" alt="">`:img}</div>
+      <div class="oinfo"><div class="oname">${o.toyName||o.toyname||'—'}</div><div class="ometa">${d}</div></div>
+      <div class="oprice">$${Number(o.price).toLocaleString('en-US')}</div>
+      <span class="spill ${st==='Fulfilled'?'ful':'ord'}">${st}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Admin Orders ──────────────────────────
+function renderAdminOrders(){
+  const total=orders.length;
+  const pend=orders.filter(o=>(o.status||'Ordered')==='Ordered').length;
+  const ful=orders.filter(o=>o.status==='Fulfilled').length;
+  const rev=orders.filter(o=>o.status==='Fulfilled').reduce((s,o)=>s+Number(o.price||0),0);
+  document.getElementById('astats').innerHTML=`
+    <div class="astat"><div class="asico" style="background:#fef3c7">📋</div><div><div class="aslabel">Total Orders</div><div class="asval">${total}</div></div></div>
+    <div class="astat"><div class="asico" style="background:#fee2e2">⏳</div><div><div class="aslabel">Pending</div><div class="asval">${pend}</div></div></div>
+    <div class="astat"><div class="asico" style="background:#dcfce7">✅</div><div><div class="aslabel">Fulfilled</div><div class="asval">${ful}</div></div></div>
+    <div class="astat"><div class="asico" style="background:#ede9fe">💰</div><div><div class="aslabel">Revenue</div><div class="asval">$${rev.toLocaleString('en-US')}</div></div></div>`;
+  const tb=document.getElementById('aotbody');
+  if(!orders.length){ tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">No orders yet.</td></tr>'; return; }
+  tb.innerHTML=orders.map(o=>{
+    const st=o.status||'Ordered';
+    const d=o.timestamp?new Date(o.timestamp).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'—';
+    const contact=o.buyerPhone||o.buyerphone?`${o.buyerEmail||o.buyeremail||''} / ${o.buyerPhone||o.buyerphone}`:(o.buyerEmail||o.buyeremail||'—');
+    const act=st==='Ordered'?`<button class="bsm bgr" onclick="markFulfilled('${o.rowIndex}',this)">✅ Fulfilled</button>`:'<span style="color:var(--muted);font-size:.75rem">Done</span>';
+    return `<tr>
+      <td><strong>${o.buyerName||o.buyername||'—'}</strong></td>
+      <td style="color:var(--muted);font-size:.75rem">${contact}</td>
+      <td>${o.toyName||o.toyname||'—'}</td>
+      <td style="color:var(--coral);font-weight:700">$${Number(o.price).toLocaleString('en-US')}</td>
+      <td style="color:var(--muted)">${d}</td>
+      <td><span class="spill ${st==='Fulfilled'?'ful':'ord'}">${st}</span></td>
+      <td>${act}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function markFulfilled(rowIndex,btn){
+  btn.disabled=true; btn.textContent='…';
+  const o=orders.find(x=>String(x.rowIndex)===String(rowIndex));
+  if(o) o.status='Fulfilled';
+  if(!CFG.APPS_SCRIPT_URL.includes("YOUR_")){
+    try{ await fetch(CFG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'fulfill',rowIndex})}); }catch{}
+  }
+  renderAdminOrders(); updateBadge(); showToast('✅ Marked as Fulfilled!');
+}
+
+// ── Inventory ─────────────────────────────
+function renderInventory(){
+  const tb=document.getElementById('invtbody');
+  if(!toys.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px">No toys loaded.</td></tr>'; return; }
+  tb.innerHTML=toys.map(t=>{
+    const ok=(t.instock||'yes').toString().toLowerCase()!=='no';
+    return `<tr>
+      <td><strong>${t.name}</strong></td>
+      <td style="color:var(--grape)">${t.category||'—'}</td>
+      <td style="color:var(--coral);font-weight:700">$${Number(t.price).toLocaleString('en-US')}</td>
+      <td><span class="spill ${ok?'ful':'ord'}">${ok?'In Stock':'Sold Out'}</span></td>
+      <td><button class="bsm ${ok?'brd':'bgr'}" onclick="toggleStock('${t.id}',this)">${ok?'Mark Sold Out':'Mark In Stock'}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleStock(id,btn){
+  const t=toys.find(x=>String(x.id)===String(id)); if(!t) return;
+  btn.disabled=true;
+  const nv=(t.instock||'yes').toString().toLowerCase()==='no'?'Yes':'No';
+  t.instock=nv;
+  if(!CFG.APPS_SCRIPT_URL.includes("YOUR_")){
+    try{ await fetch(CFG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'toggleStock',toyId:id,instock:nv})}); }catch{}
+  }
+  renderInventory(); renderGrid(); showToast(`${nv==='Yes'?'✅ In Stock':'❌ Sold Out'}: ${t.name}`);
+}
+
+// ── Wishlists (Buyer Activity) ────────────
+function renderWishlists(){
+  const byBuyer={};
+  orders.forEach(o=>{
+    const e=o.buyerEmail||o.buyeremail||'unknown';
+    if(!byBuyer[e]) byBuyer[e]={name:o.buyerName||o.buyername||e,email:e,orders:[]};
+    byBuyer[e].orders.push(o);
+  });
+  const el=document.getElementById('wlist');
+  const buyers=Object.values(byBuyer);
+  if(!buyers.length){ el.innerHTML='<div class="empty"><span class="big">💛</span><p>No buyer data yet.</p></div>'; return; }
+  el.innerHTML=buyers.map(b=>`
+    <div class="ocard" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;width:100%">
+        <div class="othumb" style="font-size:1.4rem">👤</div>
+        <div style="flex:1"><div class="oname">${b.name}</div><div class="ometa">${b.email}</div></div>
+        <span class="spill ord">${b.orders.length} order${b.orders.length!==1?'s':''}</span>
+      </div>
+      <div style="padding-left:66px;display:flex;flex-wrap:wrap;gap:7px">
+        ${b.orders.map(o=>`<span style="background:#f1f5f9;border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:600">${o.toyName||o.toyname||'?'} — $${Number(o.price).toLocaleString('en-US')} <span style="color:${(o.status||'Ordered')==='Fulfilled'?'var(--green)':'var(--sun2)'}">(${o.status||'Ordered'})</span></span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ── Toast ─────────────────────────────────
+function showToast(msg,dur=3000){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+</script>
+</body>
+</html>

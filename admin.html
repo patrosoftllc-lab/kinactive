@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎯 Kinactive — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client"></script>
+<style>
+:root{
+  --bg:#f0f4ff;--card:#fff;--sun:#f9c23c;--sun2:#f59e0b;
+  --coral:#f76c6c;--teal:#3bbfb0;--grape:#9b5de5;
+  --navy:#1a2340;--ink:#2d3a4a;--muted:#8898aa;--border:#eef0f5;
+  --green:#22c55e;--r:16px;
+  --sh:0 4px 24px rgba(26,35,64,.09);--sh2:0 16px 48px rgba(26,35,64,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* LOGIN */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(145deg,#1a2340,#2d3a4a 50%,#1e3a5f)}
+.lcard{background:var(--card);border-radius:28px;padding:48px 40px 40px;max-width:400px;width:100%;box-shadow:var(--sh2);text-align:center;animation:fadeUp .5s ease}
+.lcard .logo{font-size:3.5rem;display:block;margin-bottom:12px}
+.lcard h1{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--navy);margin-bottom:4px}
+.lcard p{color:var(--muted);font-size:.88rem;margin-bottom:28px;line-height:1.6}
+.admin-tag{display:inline-block;background:#ede9fe;color:var(--grape);border-radius:50px;padding:5px 16px;font-size:.78rem;font-weight:700;margin-bottom:24px;text-transform:uppercase;letter-spacing:.06em}
+#gsign{width:100%;padding:14px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,transform .15s;box-shadow:0 4px 16px rgba(26,35,64,.2)}
+#gsign:hover{background:#2d3a4a;transform:translateY(-2px)}
+.gico{width:22px;height:22px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#e44;flex-shrink:0}
+.error-msg{background:#fee2e2;color:#991b1b;border-radius:12px;padding:12px 16px;font-size:.85rem;font-weight:600;margin-top:16px;display:none}
+.error-msg.show{display:block}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh}
+#app.on{display:flex}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:50;background:var(--navy);padding:0 20px;display:flex;align-items:center;gap:10px;height:62px;box-shadow:0 4px 20px rgba(26,35,64,.3)}
+.tlogo{font-family:'Fredoka One',cursive;font-size:1.3rem;color:#fff;flex:1}
+.tlogo span{color:var(--sun)}
+.abadge{background:var(--grape);color:#fff;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:50px;text-transform:uppercase;letter-spacing:.05em}
+.upill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.15);border-radius:50px;padding:5px 12px 5px 5px;font-size:.78rem;font-weight:600;color:#fff}
+.uav{width:28px;height:28px;border-radius:50%;background:var(--sun);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--navy);overflow:hidden;flex-shrink:0}
+.uav img{width:100%;height:100%;object-fit:cover}
+
+/* NAV */
+.navtabs{display:flex;gap:4px;padding:12px 20px 0;border-bottom:2px solid var(--border);background:#fff;overflow-x:auto}
+.ntab{padding:9px 16px;border-radius:12px 12px 0 0;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.ntab.active{color:var(--navy);border-bottom-color:var(--grape);background:var(--bg)}
+.ntab:hover:not(.active){color:var(--ink);background:rgba(0,0,0,.04)}
+
+/* VIEWS */
+.view{display:none;flex:1;padding:22px 20px 60px;max-width:1200px;margin:0 auto;width:100%}
+.view.active{display:block}
+.stitle{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--navy);margin-bottom:16px}
+
+/* STATS */
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.astat{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px}
+.asico{font-size:1.8rem;width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.aslabel{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.asval{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--navy)}
+
+/* TABLE */
+.atbl{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:22px}
+.atblh{padding:14px 18px;border-bottom:2px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.atblh h3{font-family:'Fredoka One',cursive;font-size:1.08rem;color:var(--navy)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 14px;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border);background:#fafbfc}
+td{padding:11px 14px;font-size:.81rem;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+.bsm{padding:5px 11px;border-radius:8px;border:none;font-family:'Poppins',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s}
+.bgr{background:#dcfce7;color:#166534}.bgr:hover{background:#bbf7d0}
+.brd{background:#fee2e2;color:#991b1b}.brd:hover{background:#fecaca}
+.spill{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:50px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.spill.ord{background:#fef3c7;color:#92400e}
+.spill.ful{background:#dcfce7;color:#166534}
+
+/* ORDERS */
+.olist{display:flex;flex-direction:column;gap:13px}
+.ocard{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);display:flex;align-items:center;gap:13px}
+.othumb{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;overflow:hidden}
+.othumb img{width:100%;height:100%;object-fit:cover}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .big{font-size:3.5rem;display:block;margin-bottom:10px}
+.empty p{font-size:.92rem;font-weight:600}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--navy);color:#fff;padding:12px 24px;border-radius:50px;font-weight:600;font-size:.86rem;z-index:500;transition:transform .32s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:520px){.lcard{padding:36px 24px 32px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lcard">
+    <span class="logo">🎯</span>
+    <h1>Kinactive Admin</h1>
+    <p>Manage your toy inventory,<br/>orders and buyer activity.</p>
+    <div class="admin-tag">🔐 Admin Access Only</div>
+    <button id="gsign"><div class="gico">G</div>Sign in with Google</button>
+    <div class="error-msg" id="error-msg">⛔ Access denied. This panel is for admins only.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="tlogo">🎯 <span>Kin</span>active <span style="font-size:.75rem;opacity:.6;font-family:'Poppins',sans-serif;font-weight:600">Admin</span></div>
+    <span class="abadge">Admin</span>
+    <div class="upill" id="upill">
+      <div class="uav" id="uav"></div>
+      <span id="ulabel">…</span>
+    </div>
+  </div>
+
+  <div class="navtabs" id="navtabs">
+    <button class="ntab active" data-view="orders">🗂 Orders</button>
+    <button class="ntab" data-view="inventory">📦 Inventory</button>
+    <button class="ntab" data-view="wishlists">💛 Wishlists</button>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="view active" id="view-orders">
+    <div class="stitle">📋 All Orders</div>
+    <div class="agrid" id="astats"></div>
+    <div class="atbl">
+      <div class="atblh"><h3>Order List</h3></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Buyer</th><th>Contact</th><th>Toy</th><th>Price</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="aotbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="view" id="view-inventory">
+    <div class="stitle">🧸 Inventory</div>
+    <div class="atbl">
+      <div class="atblh"><h3>All Toys</h3></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Toy</th><th>Category</th><th>Price</th><th>Stock</th><th>Toggle</th></tr></thead>
+        <tbody id="invtbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- WISHLISTS -->
+  <div class="view" id="view-wishlists">
+    <div class="stitle">💛 Buyer Activity</div>
+    <div class="olist" id="wlist"><div class="empty"><span class="big">💛</span><p>No buyer data yet.</p></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════
+//  ★  CONFIGURATION  ★
+// ══════════════════════════
+const CFG = {
+  GOOGLE_CLIENT_ID: "940698084404-65ju48bduqpau7gchkpsf7e96gi92gqf.apps.googleusercontent.com",
+  APPS_SCRIPT_URL:  "https://script.google.com/macros/s/AKfycbxGWDJ-TZnjviIvK7jgmtgqyVRkoCpTBEQh8D15QJMTpOydTK-e9C3YD0GIbQfXUjx6/exec",
+  ADMIN_EMAIL:      "patrosoftllc@gmail.com",
+};
+// ══════════════════════════
+
+let toys=[], orders=[];
+
+// ── Auth ──────────────────────────────────
+function initAuth(){
+  if(CFG.GOOGLE_CLIENT_ID.includes("YOUR_")){
+    document.getElementById('gsign').addEventListener('click',()=>login({name:"Admin",email:CFG.ADMIN_EMAIL,picture:""}));
+    return;
+  }
+  if(typeof google==='undefined'||!google.accounts){ setTimeout(initAuth,100); return; }
+  google.accounts.id.initialize({
+    client_id:CFG.GOOGLE_CLIENT_ID,
+    callback:onCred,
+    auto_select:false,
+    ux_mode:'popup'
+  });
+  google.accounts.id.renderButton(document.getElementById('gsign'),{theme:'filled_black',size:'large',width:320,text:'signin_with',shape:'rectangular'});
+  document.getElementById('gsign').addEventListener('click',()=>google.accounts.id.prompt());
+}
+window.addEventListener('load', initAuth);
+
+function onCred(r){
+  const p=JSON.parse(atob(r.credential.split('.')[1]));
+  if(p.email.toLowerCase()!==CFG.ADMIN_EMAIL.toLowerCase()){
+    document.getElementById('error-msg').classList.add('show');
+    return;
+  }
+  login({name:p.name,email:p.email,picture:p.picture||""});
+}
+
+function login(u){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('on');
+  document.getElementById('ulabel').textContent=u.email;
+  const av=document.getElementById('uav');
+  av.innerHTML=u.picture?`<img src="${u.picture}" alt="av">`:`${u.name[0].toUpperCase()}`;
+  document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view,t)));
+  loadData();
+}
+
+function switchView(v,tab){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  if(tab) tab.classList.add('active');
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  const el=document.getElementById(`view-${v}`);
+  if(el) el.classList.add('active');
+  if(v==='orders') renderOrders();
+  if(v==='inventory') renderInventory();
+  if(v==='wishlists') renderWishlists();
+}
+
+// ── JSONP fetch ───────────────────────────
+function fetchScript(url){
+  return new Promise((resolve,reject)=>{
+    const cb='cb_'+Math.random().toString(36).slice(2);
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{ cleanup(); reject(new Error('timeout')); },10000);
+    function cleanup(){ try{delete window[cb];document.body.removeChild(s);}catch(e){} clearTimeout(t); }
+    window[cb]=function(data){ cleanup(); resolve(data); };
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    s.onerror=()=>{ cleanup(); reject(new Error('load error')); };
+    document.body.appendChild(s);
+  });
+}
+
+async function loadData(){
+  try{ const d=await fetchScript(`${CFG.APPS_SCRIPT_URL}?action=toys`); toys=Array.isArray(d)?d:[]; }catch{ toys=[]; }
+  try{ const d=await fetchScript(`${CFG.APPS_SCRIPT_URL}?action=orders`); orders=Array.isArray(d)?d:[]; }catch{ orders=[]; }
+  renderOrders();
+  renderInventory();
+}
+
+// ── Orders ────────────────────────────────
+function renderOrders(){
+  const total=orders.length;
+  const pend=orders.filter(o=>(o.status||'Ordered')==='Ordered').length;
+  const ful=orders.filter(o=>o.status==='Fulfilled').length;
+  const rev=orders.filter(o=>o.status==='Fulfilled').reduce((s,o)=>s+Number(o.price||0),0);
+  document.getElementById('astats').innerHTML=`
+    <div class="astat"><div class="asico" style="background:#fef3c7">📋</div><div><div class="aslabel">Total Orders</div><div class="asval">${total}</div></div></div>
+    <div class="astat"><div class="asico" style="background:#fee2e2">⏳</div><div><div class="aslabel">Pending</div><div class="asval">${pend}</div></div></div>
+    <div class="astat"><div class="asico" style="background:#dcfce7">✅</div><div><div class="aslabel">Fulfilled</div><div class="asval">${ful}</div></div></div>
+    <div class="astat"><div class="asico" style="background:#ede9fe">💰</div><div><div class="aslabel">Revenue</div><div class="asval">$${rev.toLocaleString('en-US')}</div></div></div>`;
+  const tb=document.getElementById('aotbody');
+  if(!orders.length){ tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">No orders yet.</td></tr>'; return; }
+  tb.innerHTML=orders.map(o=>{
+    const st=o.status||'Ordered';
+    const d=o.timestamp?new Date(o.timestamp).toLocaleDateString('en-US',{day:'numeric',month:'short'}):'—';
+    const contact=[o.buyerEmail||o.buyeremail||'',o.buyerPhone||o.buyerphone||''].filter(Boolean).join(' / ')||'—';
+    const act=st==='Ordered'?`<button class="bsm bgr" onclick="markFulfilled('${o.rowIndex}',this)">✅ Fulfilled</button>`:'<span style="color:var(--muted);font-size:.75rem">Done</span>';
+    return `<tr>
+      <td><strong>${o.buyerName||o.buyername||'—'}</strong></td>
+      <td style="color:var(--muted);font-size:.75rem">${contact}</td>
+      <td>${o.toyName||o.toyname||'—'}</td>
+      <td style="color:var(--coral);font-weight:700">$${Number(o.price).toLocaleString('en-US')}</td>
+      <td style="color:var(--muted)">${d}</td>
+      <td><span class="spill ${st==='Fulfilled'?'ful':'ord'}">${st}</span></td>
+      <td>${act}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function markFulfilled(rowIndex,btn){
+  btn.disabled=true; btn.textContent='…';
+  const o=orders.find(x=>String(x.rowIndex)===String(rowIndex));
+  if(o) o.status='Fulfilled';
+  try{ await fetch(CFG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'fulfill',rowIndex})}); }catch{}
+  renderOrders(); showToast('✅ Marked as Fulfilled!');
+}
+
+// ── Inventory ─────────────────────────────
+function renderInventory(){
+  const tb=document.getElementById('invtbody');
+  if(!toys.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px">No toys loaded.</td></tr>'; return; }
+  tb.innerHTML=toys.map(t=>{
+    const ok=(t.instock||'yes').toString().toLowerCase()!=='no';
+    return `<tr>
+      <td><strong>${t.name}</strong></td>
+      <td style="color:var(--grape)">${t.category||'—'}</td>
+      <td style="color:var(--coral);font-weight:700">$${Number(t.price).toLocaleString('en-US')}</td>
+      <td><span class="spill ${ok?'ful':'ord'}">${ok?'In Stock':'Sold Out'}</span></td>
+      <td><button class="bsm ${ok?'brd':'bgr'}" onclick="toggleStock('${t.id}',this)">${ok?'Mark Sold Out':'Mark In Stock'}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleStock(id,btn){
+  const t=toys.find(x=>String(x.id)===String(id)); if(!t) return;
+  btn.disabled=true;
+  const nv=(t.instock||'yes').toString().toLowerCase()==='no'?'Yes':'No';
+  t.instock=nv;
+  try{ await fetch(CFG.APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'toggleStock',toyId:id,instock:nv})}); }catch{}
+  renderInventory(); showToast(`${nv==='Yes'?'✅ In Stock':'❌ Sold Out'}: ${t.name}`);
+}
+
+// ── Wishlists ─────────────────────────────
+function renderWishlists(){
+  const byBuyer={};
+  orders.forEach(o=>{
+    const e=o.buyerEmail||o.buyeremail||'unknown';
+    if(!byBuyer[e]) byBuyer[e]={name:o.buyerName||o.buyername||e,email:e,orders:[]};
+    byBuyer[e].orders.push(o);
+  });
+  const el=document.getElementById('wlist');
+  const buyers=Object.values(byBuyer);
+  if(!buyers.length){ el.innerHTML='<div class="empty"><span class="big">💛</span><p>No buyer data yet.</p></div>'; return; }
+  el.innerHTML=buyers.map(b=>`
+    <div class="ocard" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;width:100%">
+        <div class="othumb" style="font-size:1.4rem">👤</div>
+        <div style="flex:1"><div style="font-weight:700;color:var(--navy)">${b.name}</div><div style="font-size:.76rem;color:var(--muted)">${b.email}</div></div>
+        <span class="spill ord">${b.orders.length} order${b.orders.length!==1?'s':''}</span>
+      </div>
+      <div style="padding-left:66px;display:flex;flex-wrap:wrap;gap:7px">
+        ${b.orders.map(o=>`<span style="background:#f1f5f9;border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:600">${o.toyName||o.toyname||'?'} — $${Number(o.price).toLocaleString('en-US')} <span style="color:${(o.status||'Ordered')==='Fulfilled'?'var(--green)':'var(--sun2)'}">(${o.status||'Ordered'})</span></span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ── Toast ─────────────────────────────────
+function showToast(msg,dur=3000){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+</script>
+</body>
+</html>
