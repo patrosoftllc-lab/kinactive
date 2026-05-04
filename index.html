@@ -372,6 +372,12 @@ window.addEventListener('load',()=>{
     if(!user){ requireLogin(); return; }
     switchView('my-orders',document.querySelector('[data-view="my-orders"]'));
   });
+  
+  // Also require login for My Orders nav tab
+  document.querySelector('[data-view="my-orders"]').addEventListener('click',()=>{
+    if(!user){ requireLogin(); return; }
+    switchView('my-orders',document.querySelector('[data-view="my-orders"]'));
+  });
 });
 
 // Show login modal — called when user tries to order without being logged in
