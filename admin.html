@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Kinactive Admin Panel - Manage orders, inventory, and buyer activity."/>
+<meta name="theme-color" content="#1a2340"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Kinactive Admin"/>
+<link rel="manifest" href="/kinactive/manifest.json"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a2340' width='192' height='192'/><text x='96' y='120' font-size='100' font-weight='bold' text-anchor='middle' fill='%23f9c23c'>🎯</text></svg>"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a2340' width='180' height='180' rx='40'/><text x='90' y='125' font-size='90' font-weight='bold' text-anchor='middle' fill='%23f9c23c'>🎯</text></svg>"/>
 <title>🎯 Kinactive — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -335,6 +343,16 @@ function renderWishlists(){
 function showToast(msg,dur=3000){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ── PWA Service Worker Registration ────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/kinactive/sw.js').then(reg=>{
+      console.log('Service Worker registered');
+      setInterval(()=>reg.update(),60000);
+    }).catch(err=>console.log('Service Worker registration failed:',err));
+  });
 }
 </script>
 </body>
